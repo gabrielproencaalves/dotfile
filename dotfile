@@ -1,0 +1,87 @@
+#!/bin/sh
+
+setup() {
+  # ifs receives newline to split lines, not words
+  IFS="
+"
+
+  # read line by line of index file
+  for line in `sed -E 's/^#.*$//' index`; do
+    path=`echo "$line" | sed -E 's/[[:alnum:]\ ._]*$//'`
+    file=`echo "$line" | sed -E 's/.*\///'`
+
+    # create path, if it doesn't exists
+    if [ -n "$path" ]; then
+      if [ ! -e "$HOME/$path" ]; then
+        mkdir -p "$HOME/$path"
+      fi
+    fi
+
+    # copy file, if it doesn't exists
+    if [ ! -e "$HOME/$line" ]; then
+      cp -r "db/$file" "$HOME/$line"
+    else
+      printf "\'%s\' already exists. Overwrite it? [y/n] " "$line"
+      read INPUT
+      if [ "$INPUT" = "y" ]; then
+        echo "Overwriting..."
+        cp -r "db/$file" "$HOME/$line"
+      else
+        echo "Skipping..."
+        continue
+      fi
+    fi
+  done
+}
+
+synchronize() {
+  # ifs receives newline to split lines, not words
+  IFS="
+"
+
+  # read line by line of index file
+  for line in `sed -E 's/^#.*$//' index`; do
+    file=`echo "$line" | sed -E 's/.*\///'`
+
+    if [ -e "$HOME/$line" ]; then
+      if [ -e "db/$file" ]; then
+        printf "\'%s\' already exists in db. Overwrite it? [y/n] " "$file"
+        read INPUT
+        if [ "$INPUT" = "y" ]; then
+          echo "Overwriting..."
+          cp -r "$HOME/$line" "db/$file"
+        else
+          echo "Skipping..."
+          continue
+        fi
+      else
+        cp -r "$HOME/$line" "db/$file"
+      fi
+    fi
+  done
+}
+
+main() {
+  if [ $# -ne 1 ]; then
+    echo "USAGE: dotfile [setup/sync]"
+    exit 1
+  fi
+
+  if [ ! -e db ]; then
+    mkdir db
+  fi
+
+  case "$1" in
+    setup)
+      setup
+    ;;
+    sync)
+      synchronize
+    ;;
+    *)
+      echo "Invalid operation: $1"
+    ;;
+  esac
+}
+
+main $@
