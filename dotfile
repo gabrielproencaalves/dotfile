@@ -49,6 +49,7 @@ synchronize() {
         read INPUT
         if [ "$INPUT" = "y" ]; then
           echo "Overwriting..."
+          rm -rf "db/$file"
           cp -r "$HOME/$line" "db/$file"
         else
           echo "Skipping..."
