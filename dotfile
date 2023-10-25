@@ -18,18 +18,19 @@ setup() {
     fi
 
     # copy file, if it doesn't exists
-    if [ ! -e "$HOME/$line" ]; then
-      cp -r "db/$file" "$HOME/$line"
-    else
+    if [ -e "$HOME/$line" ]; then
       printf "\'%s\' already exists. Overwrite it? [y/n] " "$line"
       read INPUT
       if [ "$INPUT" = "y" ]; then
         echo "Overwriting..."
+        rm -rf "$HOME/$line"
         cp -r "db/$file" "$HOME/$line"
       else
         echo "Skipping..."
         continue
       fi
+    else
+      cp -r "db/$file" "$HOME/$line"
     fi
   done
 }
@@ -66,10 +67,6 @@ main() {
   if [ $# -ne 1 ]; then
     echo "USAGE: dotfile [setup/sync]"
     exit 1
-  fi
-
-  if [ ! -e db ]; then
-    mkdir db
   fi
 
   case "$1" in
