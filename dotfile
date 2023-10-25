@@ -17,7 +17,7 @@ setup() {
       fi
     fi
 
-    # copy file, if it doesn't exists
+    # ask user permission to copy file, if it exists
     if [ -e "$HOME/$line" ]; then
       printf "\'%s\' already exists. Overwrite it? [y/n] " "$line"
       read INPUT
